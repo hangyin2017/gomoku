@@ -1,8 +1,10 @@
 'use strict';
 
-let board = document.querySelector('.board');
-let chessBoard = document.querySelector('.chessBoard');
-let btnNew = document.querySelector('.btn-new');
+const board = document.querySelector('.board');
+const chessBoard = document.querySelector('.chessBoard');
+const btnNew = document.querySelector('.btn-new');
+const btnSave = document.querySelector('.btn-save');
+const btnResume = document.querySelector('.btn-resume');
 let clickCount = 0;
 let chessArray = [];
 
@@ -32,17 +34,9 @@ const createBoard = () => {
 const initialChess = () => {
   const savedArray = localStorage.getItem('chessArray');
   if (savedArray) {
-    chessArray = savedArray;
-    console.log(savedArray);
-
+    chessArray = JSON.parse(savedArray);
     renderChessBoard();
   } else newGame();
-};
-
-const newGame = () => {
-  // Generate an 9 * 9 array of all zero.
-  chessArray = new Array(9).fill(new Array(9).fill(0));
-  renderChessBoard();
 };
 
 const renderChessBoard = () => {
@@ -60,7 +54,28 @@ const renderChessBoard = () => {
   chessBoard.innerHTML = chessBoardHTML;
 };
 
+const newGame = () => {
+  // Generate an 9 * 9 array of all zero.
+  chessArray = new Array(9).fill(new Array(9).fill(0));
+  renderChessBoard();
+};
+
+const saveGame = () => {
+  localStorage.setItem('chessArray', JSON.stringify(chessArray));
+  console.log(localStorage.chessArray);
+};
+
+// const resumeGame = () => {
+//   const savedArray = localStorage.getItem('chessArray');
+//   if (savedArray) {
+//     chessArray = JSON.parse(savedArray);
+//     renderChessBoard();
+//   }
+// };
+
 createBoard();
 initialChess();
 chessBoard.addEventListener('click', step);
 btnNew.addEventListener('click', newGame);
+btnSave.addEventListener('click', saveGame);
+btnResume.addEventListener('click', initialChess);
