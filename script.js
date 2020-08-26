@@ -1,11 +1,13 @@
 'use strict';
 
 let board = document.querySelector('.board');
-let virtualBoard = document.querySelector('.virtualBoard');
+let chessBoard = document.querySelector('.chessBoard');
+let btnNew = document.querySelector('.btn-new');
 let clickCount = 0;
+let chessArray = [];
 
-const handleClick = (e) => {
-  if (!e.target.innerHTML && e.target.className === 'virtualGrid') {
+const step = (e) => {
+  if (!e.target.innerHTML && e.target.className === 'chessGrid') {
     clickCount++;
     let chess = document.createElement('div');
     chess.classList.add('chess');
@@ -28,14 +30,37 @@ const createBoard = () => {
 };
 
 const initialChess = () => {
-  let chessArray = new Array(8).fill(new Array(8).fill(0));
-  let virtualBoardHTML = chessArray
+  const savedArray = localStorage.getItem('chessArray');
+  if (savedArray) {
+    chessArray = savedArray;
+    console.log(savedArray);
+
+    renderChessBoard();
+  } else newGame();
+};
+
+const newGame = () => {
+  // Generate an 9 * 9 array of all zero.
+  chessArray = new Array(9).fill(new Array(9).fill(0));
+  renderChessBoard();
+};
+
+const renderChessBoard = () => {
+  let chessBoardHTML = chessArray
     .flat()
-    .map((grid) => `<div class="virtualGrid"></div>`)
+    .map((grid) => {
+      let chessClass = 'chess';
+      if (grid === 0) return `<div class="chessGrid"></div>`;
+      else if (grid === 1) chessClass += ' chess-black';
+      else if (grid === 2) chessClass += ' chess-white';
+      const chessHTML = `<div class='${chessClass}'></div>`;
+      return `<div class="chessGrid">${chessHTML}</div>`;
+    })
     .join('');
-  virtualBoard.innerHTML = virtualBoardHTML;
+  chessBoard.innerHTML = chessBoardHTML;
 };
 
 createBoard();
 initialChess();
-virtualBoard.addEventListener('click', handleClick);
+chessBoard.addEventListener('click', step);
+btnNew.addEventListener('click', newGame);
