@@ -11,12 +11,21 @@ let chessArray = [];
 const step = (e) => {
   if (!e.target.innerHTML && e.target.className === 'chessGrid') {
     clickCount++;
+    const gridIndex = Number.parseInt(e.target.attributes.index.value);
     let chess = document.createElement('div');
     chess.classList.add('chess');
-    clickCount % 2
-      ? chess.classList.add('chess-black')
-      : chess.classList.add('chess-white');
+    if (clickCount % 2) {
+      chess.classList.add('chess-black');
+      chessArray[Number.parseInt(gridIndex / 9)][gridIndex % 9] = 1;
+    } else {
+      chess.classList.add('chess-white');
+      chessArray[Number.parseInt(gridIndex / 9)][gridIndex % 9] = 2;
+    }
     e.target.appendChild(chess);
+
+    // clickCount % 2
+    //   ? chess.classList.add('chess-black')
+    //   : chess.classList.add('chess-white');
   }
 };
 
@@ -42,13 +51,13 @@ const initialChess = () => {
 const renderChessBoard = () => {
   let chessBoardHTML = chessArray
     .flat()
-    .map((grid) => {
+    .map((grid, index) => {
       let chessClass = 'chess';
-      if (grid === 0) return `<div class="chessGrid"></div>`;
+      if (grid === 0) return `<div class="chessGrid" index="${index}"></div>`;
       else if (grid === 1) chessClass += ' chess-black';
       else if (grid === 2) chessClass += ' chess-white';
-      const chessHTML = `<div class='${chessClass}'></div>`;
-      return `<div class="chessGrid">${chessHTML}</div>`;
+      const chessHTML = `<div class="${chessClass}"></div>`;
+      return `<div class="chessGrid" index="${index}">${chessHTML}</div>`;
     })
     .join('');
   chessBoard.innerHTML = chessBoardHTML;
