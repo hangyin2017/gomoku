@@ -5,29 +5,15 @@ const chessBoard = document.querySelector('.chessBoard');
 const btnNew = document.querySelector('.btn-new');
 const btnSave = document.querySelector('.btn-save');
 const btnResume = document.querySelector('.btn-resume');
-let clickCount = 0;
-let chessArray = [];
+const boardLen = 9;
+const gridWidth = 100;
+const chessRadius = 40;
+const players = ['black', 'white'];
+const gridPadding = gridWidth / 2 - chessRadius;
 
-const step = (e) => {
-  if (!e.target.innerHTML && e.target.className === 'chessGrid') {
-    clickCount++;
-    const gridIndex = Number.parseInt(e.target.attributes.index.value);
-    let chess = document.createElement('div');
-    chess.classList.add('chess');
-    if (clickCount % 2) {
-      chess.classList.add('chess-black');
-      chessArray[Number.parseInt(gridIndex / 9)][gridIndex % 9] = 1;
-    } else {
-      chess.classList.add('chess-white');
-      chessArray[Number.parseInt(gridIndex / 9)][gridIndex % 9] = 2;
-    }
-    e.target.appendChild(chess);
-
-    // clickCount % 2
-    //   ? chess.classList.add('chess-black')
-    //   : chess.classList.add('chess-white');
-  }
-};
+let stepCount = 0;
+let me = 1;
+let chessArr = [];
 
 const createBoard = () => {
   const gridHTML = `<div class="grid"></div>`;
@@ -40,51 +26,135 @@ const createBoard = () => {
   board.innerHTML = boardHTML;
 };
 
-const initialChess = () => {
-  const savedArray = localStorage.getItem('chessArray');
-  if (savedArray) {
-    chessArray = JSON.parse(savedArray);
-    renderChessBoard();
-  } else newGame();
+const renderChessBoard = () => {
+  chessBoard.innerHTML = '';
+  const fragment = document.createDocumentFragment();
+  for (let y = 0; y < boardLen; y++) {
+    for (let x = 0; x < boardLen; x++) {
+      if (chessArr[y][x] > 0) {
+        fragment.appendChild(createChess(x, y));
+      }
+    }
+  }
+  chessBoard.appendChild(fragment);
 };
 
-const renderChessBoard = () => {
-  let chessBoardHTML = chessArray
-    .flat()
-    .map((grid, index) => {
-      let chessClass = 'chess';
-      if (grid === 0) return `<div class="chessGrid" index="${index}"></div>`;
-      else if (grid === 1) chessClass += ' chess-black';
-      else if (grid === 2) chessClass += ' chess-white';
-      const chessHTML = `<div class="${chessClass}"></div>`;
-      return `<div class="chessGrid" index="${index}">${chessHTML}</div>`;
-    })
-    .join('');
-  chessBoard.innerHTML = chessBoardHTML;
+const createChess = (x, y) => {
+  if (x >= 0 && x < boardLen && y >= 0 && y < boardLen) {
+    let chess = document.createElement('div');
+    chess.classList = `chess chess-${chessArr[y][x]}`;
+    chess.style.left = `${gridPadding + gridWidth * x}px`;
+    chess.style.top = `${gridPadding + gridWidth * y}px`;
+    return chess;
+  }
 };
 
 const newGame = () => {
   // Generate an 9 * 9 array of all zero.
-  chessArray = new Array(9).fill(new Array(9).fill(0));
+  chessArr = new Array(boardLen);
+  stepCount = 0;
+  me = 1;
+  for (let i = 0; i < boardLen; i++) {
+    chessArr[i] = new Array(boardLen).fill(0);
+  }
   renderChessBoard();
 };
 
 const saveGame = () => {
-  localStorage.setItem('chessArray', JSON.stringify(chessArray));
-  console.log(localStorage.chessArray);
+  localStorage.setItem('chessArr', JSON.stringify(chessArr));
+  localStorage.setItem('stepCount', stepCount);
+  console.log(localStorage.chessArr);
 };
 
-// const resumeGame = () => {
-//   const savedArray = localStorage.getItem('chessArray');
-//   if (savedArray) {
-//     chessArray = JSON.parse(savedArray);
-//     renderChessBoard();
-//   }
-// };
+const resumeGame = () => {
+  const savedArray = localStorage.getItem('chessArr');
+  const savedStepCOunt = localStorage.getItem('stepCount');
+  if (savedArray) {
+    chessArr = JSON.parse(savedArray);
+    if (savedStepCOunt) stepCount = Number.parseInt(savedStepCOunt);
+    me = !(stepCount % 2);
+    renderChessBoard();
+  } else newGame();
+};
 
-createBoard();
-initialChess();
+const step = (e) => {
+  if (e.target.className === 'chessBoard') {
+    const x = e.offsetX;
+    const y = e.offsetY;
+    const j = Math.floor(x / gridWidth);
+    const i = Math.floor(y / gridWidth);
+    if (!chessArr[i][j]) {
+      stepCount++;
+      chessArr[i][j] = me ? 1 : 2;
+      chessBoard.appendChild(createChess(j, i));
+      if (isWin(i, j)) {
+        const winner = me ? players[0] : players[1];
+        alert(`${winner} win!`);
+        newGame();
+        return;
+      }
+      me = !me;
+    }
+  }
+};
+
+const isWin = (i, j) => {
+  const chess = chessArr[i][j];
+  let count = 1;
+  for (let n = 1; j + n < boardLen; n++) {
+    if (chessArr[i][j + n] === chess) count++;
+    else break;
+  }
+  for (let n = 1; j - n >= 0; n++) {
+    if (chessArr[i][j - n] === chess) {
+      count++;
+    } else break;
+  }
+  if (count === 5) return true;
+
+  count = 1;
+  for (let n = 1; i + n < boardLen; n++) {
+    if (chessArr[i + n][j] === chess) count++;
+    else break;
+  }
+  for (let n = 1; i - n >= 0; n++) {
+    if (chessArr[i - n][j] === chess) {
+      count++;
+    } else break;
+  }
+  if (count === 5) return true;
+
+  count = 1;
+  for (let n = 1; i + n < boardLen && j + n < boardLen; n++) {
+    if (chessArr[i + n][j + n] === chess) count++;
+    else break;
+  }
+  for (let n = 1; i - n >= 0 && j - n >= 0; n++) {
+    if (chessArr[i - n][j - n] === chess) {
+      count++;
+    } else break;
+  }
+  if (count === 5) return true;
+
+  count = 1;
+  for (let n = 1; i - n >= 0 && j + n < boardLen; n++) {
+    if (chessArr[i - n][j + n] === chess) count++;
+    else break;
+  }
+  for (let n = 1; i + n < boardLen && j - n >= 0; n++) {
+    if (chessArr[i + n][j - n] === chess) {
+      count++;
+    } else break;
+  }
+  if (count === 5) return true;
+
+  return false;
+};
+
 chessBoard.addEventListener('click', step);
 btnNew.addEventListener('click', newGame);
 btnSave.addEventListener('click', saveGame);
-btnResume.addEventListener('click', initialChess);
+btnResume.addEventListener('click', resumeGame);
+
+createBoard();
+newGame();

@@ -46,10 +46,9 @@ body {
 }
 
 .chessBoard {
-  display: flex;
-  flex-wrap: wrap;
   position: absolute;
   width: 900px;
+  height: 900px;
   cursor: pointer;
 }
 
@@ -71,17 +70,18 @@ body {
 }
 
 .chess {
+  position: absolute;
   width: 80px;
   height: 80px;
-  border: 1px solid #000;
   border-radius: 50%;
-  margin: auto;
 }
 
-.chess-black {
+.chess-1 {
+  border: 1px solid #000;
   background-color: #000;
 }
 
-.chess-white {
+.chess-2 {
+  border: 1px solid #000;
   background-color: #fff;
 }
