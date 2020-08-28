@@ -21,7 +21,7 @@ body {
   flex-direction: column;
   align-items: center;
   flex: 0 0 20%;
-  text-transform: capitalize;
+  text-transform: uppercase;
 }
 
 .btn {
@@ -42,11 +42,11 @@ body {
   background-color: burlywood;
   width: 900px;
   padding: 50px;
-  cursor: pointer;
 }
 
 .chessBoard {
   position: absolute;
+  z-index: 1;
   width: 900px;
   height: 900px;
   cursor: pointer;
@@ -84,4 +84,16 @@ body {
 .chess-2 {
   border: 1px solid #000;
   background-color: #fff;
+}
+
+.alert {
+  position: fixed;
+  top: 0;
+  left: 30%;
+  right: 30%;
+  z-index: 2;
+  padding: 50px;
+  border: 1px solid black;
+  background-color: #fff;
+  font-size: 20px;
 }
